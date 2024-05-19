@@ -21,6 +21,15 @@ function drawRandomBamboo()
     love.graphics.draw(bambu, x, y)
 end
 
+function generateBambu(x, y)
+    local bambu = {}
+    -- bambu.x, bambu.y = randomPositionInMap()
+    bambu.x = x
+    bambu.y = y
+    bambu.live = true
+    table.insert(bamboos, bambu)
+end
+
 function love.load()
     -- imagem vida
     vidas = love.graphics.newImage('sprites/heart.png')
@@ -53,9 +62,9 @@ function love.load()
     player.collider:setFixedRotation(true)                                                             -- Faz com que a colisão do jogador não gire
     player.lives = 3                                                                                   -- Define a quantidade de vidas do jogador
     player.x = (gameMap.width * gameMap.tilewidth) /
-    2                                                                                                  -- Posição inicial X do jogador (centro do mapa)
+        2                                                                                              -- Posição inicial X do jogador (centro do mapa)
     player.y = (gameMap.height * gameMap.tileheight) /
-    2                                                                                                  -- Posição inicial Y do jogador
+        2                                                                                              -- Posição inicial Y do jogador
     player.speed = 180                                                                                 -- Velocidade de movimento do jogador
     player.width = 48                                                                                  -- Largura do jogador
     player.height = 64                                                                                 -- Altura do jogador
@@ -78,10 +87,12 @@ function love.load()
     -- Inicialização dos inimigos
     enemies = {} --Tabela para armazenar os inimigos
 
-    -- Gera 10 inimigos em posições aleatórias
-    for i = 1, 50 do
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 3 do
         local enemy = {}
-        enemy.x, enemy.y = randomPositionInMap()
+        enemy.x = 620 +
+        (i * 10)                                                                                        -- Posição X do inimigo
+        enemy.y = 750 + (i * 10)
         enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
         enemy.height = 52                                                                               -- Altura do inimigo
@@ -101,7 +112,128 @@ function love.load()
 
         table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
     end
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 3 do
+        local enemy = {}
+        enemy.x = 1170 +
+        (i * 10)                                                                                    -- Posição X do inimigo
+        enemy.y = 480 + (i * 10)
+        enemy.speed = 80                                                                            -- Velocidade de movimento do inimigo
+        enemy.width = 32                                                                            -- Largura do inimigo
+        enemy.height = 52                                                                           -- Altura do inimigo
+        enemy.live = true                                                                           -- Define se o inimigo está vivo ou não
+        enemy.spriteSheet = love.graphics.newImage('sprites/zombie_n_skeleton2.png')                -- Carrega a folha de sprites do inimigo
+        enemy.grid = anim8.newGrid(32, 52, enemy.spriteSheet:getWidth(), enemy.spriteSheet:getHeight()) -- Cria uma grade de animações para o inimigo
+        enemy.animations = {}
+        enemy.animations.down = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.left = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.right = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
 
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)      -- Adiciona o novo inimigo à tabela de inimigos
+    end
+
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 3 do
+        local enemy = {}
+        enemy.x = 1180 + (i * 10)                                                                       -- Posição X do inimigo
+        enemy.y = 1100 + (i+1 * 10)
+        enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
+        enemy.width = 32                                                                                -- Largura do inimigo
+        enemy.height = 52                                                                               -- Altura do inimigo
+        enemy.live = true                                                                               -- Define se o inimigo está vivo ou não
+        enemy.spriteSheet = love.graphics.newImage('sprites/zombie_n_skeleton2.png')                    -- Carrega a folha de sprites do inimigo
+        enemy.grid = anim8.newGrid(32, 52, enemy.spriteSheet:getWidth(), enemy.spriteSheet:getHeight()) -- Cria uma grade de animações para o inimigo
+        enemy.animations = {}
+        enemy.animations.down = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.left = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.right = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
+
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
+    end
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 3 do
+        local enemy = {}
+        enemy.x = 450 + (i * 10)                                                                       -- Posição X do inimigo
+        enemy.y = 1700 + (i+1 * 10)
+        enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
+        enemy.width = 32                                                                                -- Largura do inimigo
+        enemy.height = 52                                                                               -- Altura do inimigo
+        enemy.live = true                                                                               -- Define se o inimigo está vivo ou não
+        enemy.spriteSheet = love.graphics.newImage('sprites/zombie_n_skeleton2.png')                    -- Carrega a folha de sprites do inimigo
+        enemy.grid = anim8.newGrid(32, 52, enemy.spriteSheet:getWidth(), enemy.spriteSheet:getHeight()) -- Cria uma grade de animações para o inimigo
+        enemy.animations = {}
+        enemy.animations.down = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.left = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.right = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
+
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
+    end
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 3 do
+        local enemy = {}
+        enemy.x = 2000 + (i * 10)                                                                       -- Posição X do inimigo
+        enemy.y = 800 + (i+1 * 10)
+        enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
+        enemy.width = 32                                                                                -- Largura do inimigo
+        enemy.height = 52                                                                               -- Altura do inimigo
+        enemy.live = true                                                                               -- Define se o inimigo está vivo ou não
+        enemy.spriteSheet = love.graphics.newImage('sprites/zombie_n_skeleton2.png')                    -- Carrega a folha de sprites do inimigo
+        enemy.grid = anim8.newGrid(32, 52, enemy.spriteSheet:getWidth(), enemy.spriteSheet:getHeight()) -- Cria uma grade de animações para o inimigo
+        enemy.animations = {}
+        enemy.animations.down = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.left = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.right = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
+
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
+    end
+    -- Gera 3 inimigos em posições aleatórias
+    for i = 1, 5 do
+        local enemy = {}
+        enemy.x = 400 + (i * 10)                                                                       -- Posição X do inimigo
+        enemy.y = 2030 + (i+1 * 10)
+        enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
+        enemy.width = 32                                                                                -- Largura do inimigo
+        enemy.height = 52                                                                               -- Altura do inimigo
+        enemy.live = true                                                                               -- Define se o inimigo está vivo ou não
+        enemy.spriteSheet = love.graphics.newImage('sprites/zombie_n_skeleton2.png')                    -- Carrega a folha de sprites do inimigo
+        enemy.grid = anim8.newGrid(32, 52, enemy.spriteSheet:getWidth(), enemy.spriteSheet:getHeight()) -- Cria uma grade de animações para o inimigo
+        enemy.animations = {}
+        enemy.animations.down = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.left = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.right = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
+        enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
+
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
+    end
     ghosts = {}
 
     for i = 1, 20 do
@@ -121,8 +253,6 @@ function love.load()
         ghost.anim = ghost.animations.left
         table.insert(ghosts, ghost)
     end
-
-
 
     -- Criação de colisões para paredes do mapa
     walls = {}
@@ -168,12 +298,21 @@ function love.load()
 
     -- Criação dos bambus
     bamboos = {}
-    for i = 1, 20 do
-        local bambu = {}
-        bambu.x, bambu.y = randomPositionInMap()
-        bambu.live = true
-        table.insert(bamboos, bambu)
-    end
+
+    generateBambu(500, 600)
+    generateBambu(600, 600)
+    generateBambu(800, 800)
+
+    generateBambu(1600, 800)
+    generateBambu(1200, 300)
+
+    generateBambu(800, 800)
+    generateBambu(360, 1300)
+    generateBambu(410, 1500)
+
+    generateBambu(1875, 250)
+    generateBambu(2000, 250)
+    generateBambu(2200, 320)
 end
 
 local isPaused = false
@@ -244,7 +383,7 @@ function love.update(dt)
 
                 -- Verifica colisão entre o jogador e o inimigo
                 if not enemy.collided and isColliding(player.x, player.y, player.width, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
-                    player.lives = player.lives - 1
+                    -- player.lives = player.lives - 1
                     enemy.collided = true -- Marca que ocorreu uma colisão com este inimigo
                     enemy.live = false    -- Define que o inimigo não está mais vivo
 
@@ -276,7 +415,7 @@ function love.update(dt)
 
                 -- Verifica colisão entre o jogador e o inimigo apenas se ainda não ocorreu uma colisão
                 if not ghost.collided and isColliding(player.x, player.y, player.width, player.height, ghost.x, ghost.y, ghost.width, ghost.height) then
-                    player.lives = player.lives - 1
+                    -- player.lives = player.lives - 1
                     ghost.collided = true -- Marca que ocorreu uma colisão com este inimigo
                     ghost.live = false    -- Define que o inimigo não está mais vivo
 
@@ -380,14 +519,6 @@ function love.update(dt)
         -- Atualiza o temporizador do bambu
         bambuTimer = bambuTimer + dt
 
-        -- Geração de bambus
-        if bambuTimer >= 3 then
-            for i = 1, 5 do
-                local x, y = randomPositionInMap()
-                table.insert(bamboos, { x = x, y = y, live = true })
-            end
-            bambuTimer = 0
-        end
         if player.lives < 3 then
             for i = #bamboos, 1, -1 do -- detecta colisão do player com bamboo e faz ele ganhar vida
                 local bambu = bamboos[i]
@@ -410,7 +541,6 @@ function love.draw()
     --gameMap:drawLayer(gameMap.layers["montanhas"])
     gameMap:drawLayer(gameMap.layers["Camada de Blocos 1"])
     --gameMap:drawLayer(gameMap.layers["chao"])
-
 
 
 
@@ -451,6 +581,11 @@ function love.draw()
 
 
     cam:detach() -- Desanexa a câmera
+
+    local mouseX, mouseY = love.mouse.getPosition()
+    -- Agora vamos desenhar a posição do mouse na tela
+    love.graphics.print("Mouse X: " .. mouseX, 100, 100)
+    love.graphics.print("Mouse Y: " .. mouseY, 100, 300)
 
     local contador
     -- Desenha as vidas do jogador
