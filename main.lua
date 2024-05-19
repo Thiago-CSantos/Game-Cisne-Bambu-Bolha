@@ -21,7 +21,6 @@ function drawRandomBamboo()
     love.graphics.draw(bambu, x, y)
 end
 
-
 function love.load()
     -- imagem vida
     vidas = love.graphics.newImage('sprites/heart.png')
@@ -36,7 +35,7 @@ function love.load()
 
     -- Carrega a biblioteca Simple Tiled Implementation (STI) para mapas
     sti = require 'libraries/sti'
-    gameMap = sti('maps/mapa2.lua') -- Carrega o mapa
+    gameMap = sti('maps/mapateste.lua') -- Carrega o mapa
 
     -- Carrega a biblioteca para controle de câmera
     camera = require 'libraries/camera'
@@ -49,13 +48,15 @@ function love.load()
 
     -- Inicialização do jogador
     player = {}
-    player.collider = world:newBSGRectangleCollider(400, 250, 60, 90, 15)                              -- Define um retângulo de colisão para o jogador
+    player.collider = world:newBSGRectangleCollider(30, 50, 60, 70, 15)                                -- Define um retângulo de colisão para o jogador
 
     player.collider:setFixedRotation(true)                                                             -- Faz com que a colisão do jogador não gire
-    player.lives = 4                                                                                   -- Define a quantidade de vidas do jogador
-    player.x = (gameMap.width * gameMap.tilewidth) /2                                                                                              -- Posição inicial X do jogador (centro do mapa)
-    player.y = (gameMap.height * gameMap.tileheight) /2                                                                                             -- Posição inicial Y do jogador
-    player.speed = 80                                                                                  -- Velocidade de movimento do jogador
+    player.lives = 3                                                                                   -- Define a quantidade de vidas do jogador
+    player.x = (gameMap.width * gameMap.tilewidth) /
+    2                                                                                                  -- Posição inicial X do jogador (centro do mapa)
+    player.y = (gameMap.height * gameMap.tileheight) /
+    2                                                                                                  -- Posição inicial Y do jogador
+    player.speed = 180                                                                                 -- Velocidade de movimento do jogador
     player.width = 48                                                                                  -- Largura do jogador
     player.height = 64                                                                                 -- Altura do jogador
 
@@ -81,9 +82,7 @@ function love.load()
     for i = 1, 50 do
         local enemy = {}
         enemy.x, enemy.y = randomPositionInMap()
-
-        -- Restante das configurações do inimigo, como velocidade, dimensões, etc.
-        enemy.speed = 70                                                                                -- Velocidade de movimento do inimigo
+        enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
         enemy.height = 52                                                                               -- Altura do inimigo
         enemy.live = true                                                                               -- Define se o inimigo está vivo ou não
@@ -96,15 +95,19 @@ function love.load()
         enemy.animations.up = anim8.newAnimation(enemy.grid('1-6', 1), time)
         enemy.anim = enemy.animations.left -- Define a animação inicial do inimigo como 'esquerda'
 
-        table.insert(enemies, enemy)       -- Adiciona o novo inimigo à tabela de inimigos
+        -- Cria um colisor para o inimigo
+        enemy.collider = world:newBSGRectangleCollider(enemy.x, enemy.y, enemy.width, enemy.height, 8)
+        enemy.collider:setFixedRotation(true) -- Impede que o colisor gire
+
+        table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
     end
 
     ghosts = {}
 
-    for i = 1, 10 do
-        local ghost = {}    
-        ghost.x, ghost.y = randomPositionInMap()    
-        ghost.speed = 130
+    for i = 1, 20 do
+        local ghost = {}
+        ghost.x, ghost.y = randomPositionInMap()
+        ghost.speed = 100
         ghost.width = 32
         ghost.height = 32
         ghost.live = true
@@ -113,8 +116,8 @@ function love.load()
         ghost.animations = {}
         ghost.animations.down = anim8.newAnimation(ghost.grid('1-6', 1), time)
         ghost.animations.left = anim8.newAnimation(ghost.grid('1-6', 1), time)
-        ghost.animations.right = anim8.newAnimation(ghost.grid('1-6', 1), time) 
-        ghost.animations.up = anim8.newAnimation(ghost.grid('1-6', 1), time)    
+        ghost.animations.right = anim8.newAnimation(ghost.grid('1-6', 1), time)
+        ghost.animations.up = anim8.newAnimation(ghost.grid('1-6', 1), time)
         ghost.anim = ghost.animations.left
         table.insert(ghosts, ghost)
     end
@@ -126,17 +129,15 @@ function love.load()
     if gameMap.layers['walls'] then
         for i, obj in pairs(gameMap.layers["walls"].objects) do
             local wall = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
-
             table.insert(walls, wall)
             wall:setType('static')
         end
     end
-
     -- Inicialização das bolhas
     orbs = {}
 
     -- Número de esferas desejadas
-    numOrbs = 4
+    numOrbs = 3
 
     -- Raio da órbita
     orbitRadius = 100
@@ -231,12 +232,17 @@ function love.update(dt)
                 local dy = player.y + player.height / 2 - enemy.y
                 local distance = math.sqrt(dx * dx + dy * dy)
                 if distance > 0 then
-                    enemy.x = enemy.x + dx / distance * enemy.speed * dt
-                    enemy.y = enemy.y + dy / distance * enemy.speed * dt
+                    local vx = dx / distance * enemy.speed
+                    local vy = dy / distance * enemy.speed
+                    enemy.collider:setLinearVelocity(vx, vy)
                 end
                 enemy.anim:update(dt) -- Atualiza a animação do inimigo
 
-                -- Verifica colisão entre o jogador e o inimigo apenas se ainda não ocorreu uma colisão
+                -- Atualiza a posição do inimigo
+                enemy.x = enemy.collider:getX() - enemy.width / 2
+                enemy.y = enemy.collider:getY() - enemy.height / 2
+
+                -- Verifica colisão entre o jogador e o inimigo
                 if not enemy.collided and isColliding(player.x, player.y, player.width, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
                     player.lives = player.lives - 1
                     enemy.collided = true -- Marca que ocorreu uma colisão com este inimigo
@@ -255,6 +261,7 @@ function love.update(dt)
             end
         end
 
+        -- Movimentação dos fantasmas (semelhante aos inimigos)
         for i = #ghosts, 1, -1 do
             local ghost = ghosts[i]
             if ghost and ghost.live then
@@ -279,13 +286,12 @@ function love.update(dt)
                     -- Inicia o temporizador para restaurar a cor normal
                     colorTimer = colorDuration
                     if player.lives <= 0 then
-                        -- love.event.quit()    -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
+                        love.event.quit()   -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
                     end
                     table.remove(ghosts, i) -- Remove o inimigo da tabela
                 end
             end
         end
-        
 
         -- Atualiza o ângulo das esferas
         angle = angle + orbitSpeed * dt
@@ -354,13 +360,13 @@ function love.update(dt)
                 if ghost and orb and ghost.live then
                     if isCollidingOrbs(orb.x, orb.y, ghost.x, ghost.y, orbImage:getWidth() / 2, ghost.width / 2) then
                         -- Lógica para colisão entre orbs e inimigos
-                        ghost.live = false       -- Define que o inimigo não está mais vivo
+                        ghost.live = false      -- Define que o inimigo não está mais vivo
                         table.remove(ghosts, j) -- Remove o inimigo da lista
                         contadorMortes = contadorMortes + 1
                     end
                 end
             end
-        end 
+        end
 
         -- Atualiza o temporizador de mudança de cor
         if colorTimer > 0 then
@@ -375,25 +381,60 @@ function love.update(dt)
         bambuTimer = bambuTimer + dt
 
         -- Geração de bambus
-        if bambuTimer >= 11 then
+        if bambuTimer >= 3 then
             for i = 1, 5 do
                 local x, y = randomPositionInMap()
                 table.insert(bamboos, { x = x, y = y, live = true })
             end
             bambuTimer = 0
         end
+        if player.lives < 3 then
+            for i = #bamboos, 1, -1 do -- detecta colisão do player com bamboo e faz ele ganhar vida
+                local bambu = bamboos[i]
+                if bambu.live and isColliding(player.x, player.y, player.width, player.height, bambu.x, bambu.y, bambuImage:getWidth(), bambuImage:getHeight()) then
+                    player.lives = player.lives + 1
+                    bambu.live = false
+                end
+            end
+        end
     end
 end
 
 function love.draw()
     cam:attach() -- Anexa a câmera
-
+    world:draw()
     -- Desenha as camadas do mapa
+    --gameMap:drawLayer(gameMap.layers["camada3"])
+    --gameMap:drawLayer(gameMap.layers["Camada de Blocos 1"])
+    --gameMap:drawLayer(gameMap.layers["objetosnomapa"])
+    --gameMap:drawLayer(gameMap.layers["montanhas"])
     gameMap:drawLayer(gameMap.layers["Camada de Blocos 1"])
-    gameMap:drawLayer(gameMap.layers["arvores"])
+    --gameMap:drawLayer(gameMap.layers["chao"])
+
+
+
 
     -- Desenha o jogador
     player.anim:draw(player.spriteSheet, player.x, player.y, nil, 2, nil, 2, 2)
+    for _, bambu in ipairs(bamboos) do
+        if bambu.live then
+            love.graphics.draw(bambuImage, bambu.x, bambu.y)
+        end
+    end
+    for _, enemy in ipairs(enemies) do
+        if enemy then
+            enemy.anim:draw(enemy.spriteSheet, enemy.x, enemy.y, nil, 2)
+        end
+    end
+    for _, ghost in ipairs(ghosts) do
+        if ghost then
+            ghost.anim:draw(ghost.spriteSheet, ghost.x, ghost.y, nil, 2)
+        end
+    end
+
+    gameMap:drawLayer(gameMap.layers["paredes1"])
+    gameMap:drawLayer(gameMap.layers["paredes"])
+    gameMap:drawLayer(gameMap.layers["objetos"])
 
     -- Desenha as esferas orbitando o jogador
     for i, orb in ipairs(orbs) do
@@ -404,35 +445,19 @@ function love.draw()
         love.graphics.draw(orbImage, ballX, ballY, 10)
     end
 
-    -- Desenha os inimigos
-    for _, enemy in ipairs(enemies) do
-        if enemy then
-            enemy.anim:draw(enemy.spriteSheet, enemy.x, enemy.y, nil, 2)
-        end
-    end
-
-    for _, ghost in ipairs(ghosts) do
-        if ghost then
-            ghost.anim:draw(ghost.spriteSheet, ghost.x, ghost.y, nil, 2)
-        end
-    end
-
-    gameMap:drawLayer(gameMap.layers["arvores2"])
+    --gameMap:drawLayer(gameMap.layers["arvores2"])
 
     -- Desenha os bambus
-    for _, bambu in ipairs(bamboos) do
-        if bambu.live then
-            love.graphics.draw(bambuImage, bambu.x, bambu.y)
-        end
-    end
+
 
     cam:detach() -- Desanexa a câmera
 
+    local contador
     -- Desenha as vidas do jogador
     for i = 1, player.lives do
         love.graphics.draw(vidas, 10 + (i - 1) * (vidas:getWidth() + 5), 10) -- Desenha os corações com um espaçamento de 5 pixels entre eles
     end
-
+    love.graphics.print(player.lives)
     -- Exibe o contador de mortes na tela
     love.graphics.print("Mortes: " .. contadorMortes, 10, 30)
 
