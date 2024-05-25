@@ -72,58 +72,16 @@ function generateorb(x, y)
     numOrbs = numOrbs + 1
 end
 
-function reinicia()
-
-end
-
-function love.load()
-    if gameState == "menu" then
-        -- Configuração para tela cheia
-        love.window.setFullscreen(true)
-
-        -- Carregar a imagem de fundo
-        cisneBackground = love.graphics.newImage("background/cisneBackground.png")
-
-        -- Obtendo as dimensões da tela
-        local screenWidth, screenHeight = love.graphics.getDimensions()
-
-        -- Definindo o tamanho do texto
-        local fontSize = 30
-        love.graphics.setFont(love.graphics.newFont(fontSize))
-
-        -- Calculando a largura do texto
-        local textWidth = love.graphics.getFont():getWidth("Iniciar Jogo")
-
-        -- Calculando a posição x para centralizar o texto
-        local x = (screenWidth - textWidth) / 2
-
-        -- Calculando a posição y para centralizar o texto verticalmente
-        local y = screenHeight / 2 - fontSize / 2
-
-        -- Criando o menu principal
-        menuPrincipal = menuengine.new(x, y)
-        menuPrincipal:addEntry("Iniciar Jogo", iniciar_jogo, nil, nil, BLACK, BLUE)
-        menuPrincipal:addEntry("Opções", opcoes, nil, nil, BLACK, BLUE)
-        menuPrincipal:addSep()
-        menuPrincipal:addEntry("Sair do Jogo", sair_jogo, nil, nil, BLACK, BLUE)
-    end
-    
-    somMenu = love.audio.newSource("sounds/castle 2.ogg", "stream")
-
-    somZumbi = love.audio.newSource("sounds/Zombie Sound.wav", "static")
-    somZumbi:setVolume(0.5)
-    somzumbiflag = 0
-    
-
-
+function carregaJogo()
+    gameState = "menu"
     -- imagem vida
     vidas = love.graphics.newImage('sprites/heart.png')
     -- Carregamento de bibliotecas e configurações iniciais
     -- Carrega a biblioteca Windfield para física
     wf = require 'libraries/windfield'
     world = wf.newWorld(0, 0) -- Cria um novo mundo de física
-    parede = world:newBSGRectangleCollider(1100,2400, 600,2,15)
-    parede: setType('static')
+    parede = world:newBSGRectangleCollider(1100, 2400, 600, 2, 15)
+    parede:setType('static')
 
     -- Carrega a biblioteca Anim8 para animações
     anim8 = require 'libraries/anim8'
@@ -159,7 +117,8 @@ function love.load()
     player.spriteSheet = love.graphics.newImage('sprites/dodo.png')                                    -- Carrega a folha de sprites do jogador
     player.grid = anim8.newGrid(48, 64, player.spriteSheet:getWidth(), player.spriteSheet:getHeight()) -- Cria uma grade de animações
 
-    time = player.speed / 400 -- Define o tempo de animação com base na velocidade do jogador
+    time = player.speed /
+    400                                                                                                -- Define o tempo de animação com base na velocidade do jogador
 
     -- Define as animações do jogador para cada direção
     player.animations = {}
@@ -389,7 +348,8 @@ function love.load()
     -- inimigos mapa novo
     for i = 1, 3 do
         local enemy = {}
-        enemy.x = 540 + (i * 60)                                                                                    -- Posição X do inimigo
+        enemy.x = 540 +
+            (i * 60)                                                                                    -- Posição X do inimigo
         enemy.y = 4100 + (i + 1 * 30)
         enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
@@ -435,10 +395,11 @@ function love.load()
 
         table.insert(enemies, enemy)          -- Adiciona o novo inimigo à tabela de inimigos
     end
-    
+
     for i = 1, 8 do
         local enemy = {}
-        enemy.x = 2000 + (i * 60)                                                                                    -- Posição X do inimigo
+        enemy.x = 2000 +
+            (i * 60)                                                                                    -- Posição X do inimigo
         enemy.y = 2800 + ((i + 2) * math.random(30, 50))
         enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
@@ -462,7 +423,8 @@ function love.load()
 
     for i = 1, 8 do
         local enemy = {}
-        enemy.x = 120 + i + (i * 60)                                                                                    -- Posição X do inimigo
+        enemy.x = 120 + i +
+            (i * 60)                                                                                    -- Posição X do inimigo
         enemy.y = 3450
         enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
@@ -486,7 +448,8 @@ function love.load()
 
     for i = 1, 8 do
         local enemy = {}
-        enemy.x = 4000 + i + (i * 60)                                                                                    -- Posição X do inimigo
+        enemy.x = 4000 + i +
+            (i * 60)                                                                                    -- Posição X do inimigo
         enemy.y = 3500
         enemy.speed = 80                                                                                -- Velocidade de movimento do inimigo
         enemy.width = 32                                                                                -- Largura do inimigo
@@ -520,13 +483,13 @@ function love.load()
             wall:setType('static')
         end
     end
-    
+
     -- Inicialização das bolhas
     orbs = {}
 
 
     bubleMusic = love.audio.newSource('sounds/Plop.ogg', 'static')
-    
+
     -- Número de esferas desejadas
     numOrbs = 4
 
@@ -575,6 +538,47 @@ function love.load()
     generateBambu(1875, 250)
     generateBambu(2000, 250)
     generateBambu(2200, 320)
+end
+
+function love.load()
+    if gameState == "menu" then
+        -- Configuração para tela cheia
+        love.window.setFullscreen(true)
+
+        -- Carregar a imagem de fundo
+        cisneBackground = love.graphics.newImage("background/cisneBackground.png")
+
+        -- Obtendo as dimensões da tela
+        local screenWidth, screenHeight = love.graphics.getDimensions()
+
+        -- Definindo o tamanho do texto
+        local fontSize = 30
+        love.graphics.setFont(love.graphics.newFont(fontSize))
+
+        -- Calculando a largura do texto
+        local textWidth = love.graphics.getFont():getWidth("Iniciar Jogo")
+
+        -- Calculando a posição x para centralizar o texto
+        local x = (screenWidth - textWidth) / 2
+
+        -- Calculando a posição y para centralizar o texto verticalmente
+        local y = screenHeight / 2 - fontSize / 2
+
+        -- Criando o menu principal
+        menuPrincipal = menuengine.new(x, y)
+        menuPrincipal:addEntry("Iniciar Jogo", iniciar_jogo, nil, nil, BLACK, BLUE)
+        menuPrincipal:addEntry("Opções", opcoes, nil, nil, BLACK, BLUE)
+        menuPrincipal:addSep()
+        menuPrincipal:addEntry("Sair do Jogo", sair_jogo, nil, nil, BLACK, BLUE)
+    end
+
+    somMenu = love.audio.newSource("sounds/castle 2.ogg", "stream")
+
+    somZumbi = love.audio.newSource("sounds/Zombie Sound.wav", "static")
+    somZumbi:setVolume(0.5)
+    somzumbiflag = 0
+
+    carregaJogo()
 end
 
 local isPaused = false
@@ -652,10 +656,7 @@ function love.update(dt)
                             local vy = dy / distance * enemy.speed
                             enemy.collider:setLinearVelocity(vx, vy)
                             enemy.anim:update(dt)
-                                                        
                         end
-
-       
                     end
 
                     -- Atualiza a animação do inimigo
@@ -676,9 +677,9 @@ function love.update(dt)
                         -- Inicia o temporizador para restaurar a cor normal
                         colorTimer = colorDuration
                         if player.lives <= 0 then
-                            love.event.quit("restart") -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
+
                         end
-                        table.remove(enemies, i)       -- Remove o inimigo da tabela
+                        table.remove(enemies, i) -- Remove o inimigo da tabela
                     end
                 end
             end
@@ -772,7 +773,7 @@ function love.update(dt)
                         -- Inicia o temporizador para restaurar a cor normal
                         colorTimer = colorDuration
                         if player.lives <= 0 then
-                            love.event.quit("restart") -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
+                            gameState = "morreu"
                         end
                     end
                 end
@@ -833,7 +834,7 @@ function love.update(dt)
                             contadorMortes = contadorMortes + 100
                             -- remove a bolha
                             -- table.remove(orbs, i)
-                            -- carregar audio 
+                            -- carregar audio
                             bubleMusic:play()
                         end
                     end
@@ -886,9 +887,8 @@ function love.update(dt)
                                 minotaur.live = false      -- Define que o inimigo não está mais vivo
                                 table.remove(minotaurs, j) -- Remove o inimigo da lista
                                 contadorMortes = contadorMortes + 500
-                                -- destroir a colisão parede 
+                                -- destroir a colisão parede
                                 parede:destroy()
-                                
                             end
                         end
                     end
@@ -957,7 +957,7 @@ function love.draw()
         --gameMap:drawLayer(gameMap.layers["Camada de Blocos 1"])
         --gameMap:drawLayer(gameMap.layers["objetosnomapa"])
         --gameMap:drawLayer(gameMap.layers["montanhas"])
-        
+
         gameMap:drawLayer(gameMap.layers["Camada de Blocos 1"])
         --gameMap:drawLayer(gameMap.layers["chao"])
 
@@ -980,7 +980,7 @@ function love.draw()
                 ghost.anim:draw(ghost.spriteSheet, ghost.x, ghost.y, nil, 2)
             end
         end
-        
+
         for _, minotaur in ipairs(minotaurs) do
             if minotaur then
                 local barWidth = 50 + 50     -- Largura da barra de vida
@@ -1106,7 +1106,6 @@ function love.draw()
     end
 
     if gameState == "opcoes" then
-        
         -- Desenha o menu de opções
         love.graphics.setColor(255, 255, 255)
         love.graphics.print("Opções", 400, 300)
@@ -1115,9 +1114,18 @@ function love.draw()
 
         -- Desenha o botão de voltar
         love.graphics.print("Voltar", 400, 450)
-        
+    end
 
-
+    if gameState == "morreu"
+    then
+        --escreva na tela que o jogador morreu
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.print("Você morreu!", 400, 300)
+        --escrever a pontuação na tela
+        love.graphics.print("Pontuação: " .. contadorMortes, 400, 400)
+        if love.keyboard.isDown("r") then
+            carregaJogo()
+        end
     end
 end
 
