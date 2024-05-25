@@ -28,8 +28,8 @@ local function opcoes()
     gameState = "opcoes"
 end
 
-local function opcoes()
-    text = "Opções selecionadas!"
+local function comandos()
+    gameState = "comandos"
 end
 
 local function sair_jogo()
@@ -73,7 +73,9 @@ function generateorb(x, y)
 end
 
 function carregaJogo()
-    gameState = "menu"
+    if gameState ~= "menu" then
+        gameState = "jogo"
+    end
     -- imagem vida
     vidas = love.graphics.newImage('sprites/heart.png')
     -- Carregamento de bibliotecas e configurações iniciais
@@ -105,7 +107,7 @@ function carregaJogo()
     player.collider = world:newBSGRectangleCollider(1900, 4300, 60, 70, 15)                            -- Define um retângulo de colisão para o jogador
 
     player.collider:setFixedRotation(true)                                                             -- Faz com que a colisão do jogador não gire
-    player.lives = 30                                                                                  -- Define a quantidade de vidas do jogador
+    player.lives = 5                                                                                   -- Define a quantidade de vidas do jogador
     player.x = (gameMap.width * gameMap.tilewidth) /
         2                                                                                              -- Posição inicial X do jogador (centro do mapa)
     player.y = (gameMap.height * gameMap.tileheight) /
@@ -118,7 +120,7 @@ function carregaJogo()
     player.grid = anim8.newGrid(48, 64, player.spriteSheet:getWidth(), player.spriteSheet:getHeight()) -- Cria uma grade de animações
 
     time = player.speed /
-    400                                                                                                -- Define o tempo de animação com base na velocidade do jogador
+        400 -- Define o tempo de animação com base na velocidade do jogador
 
     -- Define as animações do jogador para cada direção
     player.animations = {}
@@ -538,6 +540,9 @@ function carregaJogo()
     generateBambu(1875, 250)
     generateBambu(2000, 250)
     generateBambu(2200, 320)
+
+    somDemonio = love.audio.newSource("sounds/demonio.wav", "stream")
+    somMinotauro = love.audio.newSource("sounds/minot.mp3", "stream")
 end
 
 function love.load()
@@ -547,6 +552,7 @@ function love.load()
 
         -- Carregar a imagem de fundo
         cisneBackground = love.graphics.newImage("background/cisneBackground.png")
+        fundoComandos = love.graphics.newImage("sounds/spacebar.jpeg")
 
         -- Obtendo as dimensões da tela
         local screenWidth, screenHeight = love.graphics.getDimensions()
@@ -568,6 +574,7 @@ function love.load()
         menuPrincipal = menuengine.new(x, y)
         menuPrincipal:addEntry("Iniciar Jogo", iniciar_jogo, nil, nil, BLACK, BLUE)
         menuPrincipal:addEntry("Opções", opcoes, nil, nil, BLACK, BLUE)
+        menuPrincipal:addEntry("Comandos", comandos, nil, nil, BLACK, BLUE)
         menuPrincipal:addSep()
         menuPrincipal:addEntry("Sair do Jogo", sair_jogo, nil, nil, BLACK, BLUE)
     end
@@ -677,7 +684,7 @@ function love.update(dt)
                         -- Inicia o temporizador para restaurar a cor normal
                         colorTimer = colorDuration
                         if player.lives <= 0 then
-
+                            gameState = "morreu"
                         end
                         table.remove(enemies, i) -- Remove o inimigo da tabela
                     end
@@ -710,9 +717,9 @@ function love.update(dt)
                         -- Inicia o temporizador para restaurar a cor normal
                         colorTimer = colorDuration
                         if player.lives <= 0 then
-                            love.event.quit("restart") -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
+                            gameState = "morreu"
                         end
-                        table.remove(ghosts, i)        -- Remove o inimigo da tabela
+                        table.remove(ghosts, i) -- Remove o inimigo da tabela
                     end
                 end
             end
@@ -727,7 +734,12 @@ function love.update(dt)
                     if distance < 1200 then
                         devil.x = devil.x + dx / distance * devil.speed * dt
                         devil.y = devil.y + dy / distance * devil.speed * dt
+                        -- musica demoniaca
+                        somDemonio:play()
+                    else
+                        somDemonio:stop()
                     end
+
                     devil.anim:update(dt) -- Atualiza a animação do inimigo
 
                     -- Verifica colisão entre o jogador e o inimigo apenas se ainda não ocorreu uma colisão
@@ -742,7 +754,8 @@ function love.update(dt)
                         -- Inicia o temporizador para restaurar a cor normal
                         colorTimer = colorDuration
                         if player.lives <= 0 then
-                            love.event.quit("restart") -- Encerra o jogo se o jogador ficar sem vidas Mudar aqui quando morrer
+                            somDemonio:stop()
+                            gameState = "morreu"
                         end
                         --table.remove(devils, i)        -- Remove o inimigo da tabela
                     end
@@ -759,6 +772,10 @@ function love.update(dt)
                     if distance < 500 then
                         minotaur.x = minotaur.x + dx / distance * minotaur.speed * dt
                         minotaur.y = minotaur.y + dy / distance * minotaur.speed * dt
+                        -- musica do minotauro
+                        somMinotauro:play()
+                    else
+                        somMinotauro:stop()
                     end
                     minotaur.anim:update(dt) -- Atualiza a animação do inimigo
 
@@ -889,6 +906,7 @@ function love.update(dt)
                                 contadorMortes = contadorMortes + 500
                                 -- destroir a colisão parede
                                 parede:destroy()
+                                somMinotauro:stop()
                             end
                         end
                     end
@@ -927,6 +945,8 @@ function love.draw()
         love.graphics.print("Você ganhou!", 400, 300)
         --escrever a pontuação na tela
         love.graphics.print("Pontuação: " .. contadorMortes, 400, 400)
+        somDemonio:stop()
+        somMinotauro:stop()
     end
     if gameState == "menu" then
         -- Obtendo as dimensões da imagem de fundo
@@ -1101,9 +1121,6 @@ function love.draw()
         end
     end
 
-    if gameState == "vitoria" then
-        love.graphics.print("Você venceu!", 10, 10)
-    end
 
     if gameState == "opcoes" then
         -- Desenha o menu de opções
@@ -1113,16 +1130,46 @@ function love.draw()
         love.graphics.print("Pressione 'S' para aumentar o áudio", 400, 400)
 
         -- Desenha o botão de voltar
-        love.graphics.print("Voltar", 400, 450)
+        love.graphics.print("Voltar (ESC)", 400, 450)
+
+        love.graphics.print("Volume: " .. somMenu:getVolume(), 400, 900)
     end
 
-    if gameState == "morreu"
-    then
+    if gameState == "comandos" then
+        -- Define a cor de fundo como cinza
+        love.graphics.setColor(79, 38, 38) -- RGB for gray
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) -- Desenha o fundo cinza
+
+        -- Reseta a cor para preto para o restante dos desenhos
+        love.graphics.setColor(0, 0, 0)
+
+        -- Desenha o menu de opções
+        love.graphics.rectangle("line", 100, 250, love.graphics.getWidth() - 200, 350) -- Desenha o quadro
+
+        love.graphics.setFont(love.graphics.newFont(36))
+        love.graphics.printf("Comandos", 0, 300, love.graphics.getWidth(), "center")
+        love.graphics.setFont(love.graphics.newFont(24))
+        love.graphics.printf("Movimentação: [W], [A], [S], [D]", 0, 350, love.graphics.getWidth(), "center")
+        love.graphics.printf("Dash: [Espaço]", 0, 400, love.graphics.getWidth(), "center")
+        love.graphics.printf("Pausar: [P]", 0, 450, love.graphics.getWidth(), "center")
+
+        -- Desenha o botão de voltar
+        love.graphics.setFont(love.graphics.newFont(36))
+        love.graphics.printf("Voltar (ESC)", 0, 500, love.graphics.getWidth(), "center")
+
+        love.graphics.setColor(255, 255, 255)
+    end
+
+    if gameState == "morreu" then
         --escreva na tela que o jogador morreu
         love.graphics.setColor(255, 255, 255)
         love.graphics.print("Você morreu!", 400, 300)
         --escrever a pontuação na tela
         love.graphics.print("Pontuação: " .. contadorMortes, 400, 400)
+
+        love.graphics.print("Pressione 'R' ", 400, 500)
+        somDemonio:stop()
+        somMinotauro:stop()
         if love.keyboard.isDown("r") then
             carregaJogo()
         end
@@ -1132,13 +1179,22 @@ end
 function love.keypressed(key, scancode, isrepeat)
     if key == "p" then
         isPaused = not isPaused
-    end
-    menuengine.keypressed(scancode)
-
-    if scancode == "escape" then
+    elseif gameState == "menu" and scancode == "escape" then
         love.event.quit(0)
-    end
-    if key == "r" then
+    elseif gameState == "opcoes" and key == "s" then
+        local newVolume = math.max(0, somMenu:getVolume() - 0.1)
+        somMenu:setVolume(newVolume)
+    elseif gameState == "opcoes" and key == "w" then
+        local newVolume = math.max(0, somMenu:getVolume() + 0.1)
+        somMenu:setVolume(newVolume)
+    elseif gameState == "opcoes" and key == "escape" then
+        gameState = "menu"
+    elseif gameState == "morreu" and key == "escape" then
+        gameState = "menu"
+    elseif gameState == "ganhou" and key == "escape" then
+        gameState = "menu"
+    elseif gameState == "comandos" and key == "escape" then
+        gameState = "menu"
     end
 end
 
