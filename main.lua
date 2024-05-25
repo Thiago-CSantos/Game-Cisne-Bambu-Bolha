@@ -552,7 +552,8 @@ function love.load()
 
         -- Carregar a imagem de fundo
         cisneBackground = love.graphics.newImage("background/cisneBackground.png")
-        fundoComandos = love.graphics.newImage("sounds/spacebar.jpeg")
+        fundoGameOver = love.graphics.newImage("sounds/gameOver.jpeg")
+        fundoWin = love.graphics.newImage("sounds/gameWin.jpeg")
 
         -- Obtendo as dimensões da tela
         local screenWidth, screenHeight = love.graphics.getDimensions()
@@ -736,6 +737,7 @@ function love.update(dt)
                         devil.y = devil.y + dy / distance * devil.speed * dt
                         -- musica demoniaca
                         somDemonio:play()
+                        somDemonio:setVolume(0.4)
                     else
                         somDemonio:stop()
                     end
@@ -774,6 +776,7 @@ function love.update(dt)
                         minotaur.y = minotaur.y + dy / distance * minotaur.speed * dt
                         -- musica do minotauro
                         somMinotauro:play()
+                        somMinotauro:setVolume(0.4)
                     else
                         somMinotauro:stop()
                     end
@@ -940,11 +943,12 @@ end
 
 function love.draw()
     if gameState == "ganhou" then
+        
+        love.graphics.draw(fundoWin, love.graphics.getWidth()/2 - fundoGameOver:getWidth()/2, love.graphics.getHeight()/2 - fundoGameOver:getHeight()/2)
         --escreva na tela que o jogador ganhou
         love.graphics.setColor(255, 255, 255)
-        love.graphics.print("Você ganhou!", 400, 300)
         --escrever a pontuação na tela
-        love.graphics.print("Pontuação: " .. contadorMortes, 400, 400)
+        love.graphics.print("Pontuação: " .. contadorMortes, 100, 400)
         somDemonio:stop()
         somMinotauro:stop()
     end
@@ -1123,16 +1127,24 @@ function love.draw()
 
 
     if gameState == "opcoes" then
-        -- Desenha o menu de opções
-        love.graphics.setColor(255, 255, 255)
+         -- Define a cor de fundo como cinza
+         love.graphics.setColor(79, 38, 38) -- RGB for gray
+         love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) -- Desenha o fundo cinza
+ 
+         -- Reseta a cor para preto para o restante dos desenhos
+         love.graphics.setColor(0, 0, 0)
+ 
+         -- Desenha o menu de opções
+         love.graphics.rectangle("line", 100, 250, love.graphics.getWidth() - 200, 350) -- Desenha o quadro
+
+        love.graphics.setColor(0, 0, 0)
         love.graphics.print("Opções", 400, 300)
         love.graphics.print("Pressione 'A' para abaixar o áudio", 400, 350)
         love.graphics.print("Pressione 'S' para aumentar o áudio", 400, 400)
 
         -- Desenha o botão de voltar
         love.graphics.print("Voltar (ESC)", 400, 450)
-
-        love.graphics.print("Volume: " .. somMenu:getVolume(), 400, 900)
+        love.graphics.setColor(255, 255, 255)
     end
 
     if gameState == "comandos" then
@@ -1161,13 +1173,14 @@ function love.draw()
     end
 
     if gameState == "morreu" then
+        love.graphics.draw(fundoGameOver, love.graphics.getWidth()/2 - fundoGameOver:getWidth()/2, love.graphics.getHeight()/2 - fundoGameOver:getHeight()/2)
         --escreva na tela que o jogador morreu
         love.graphics.setColor(255, 255, 255)
-        love.graphics.print("Você morreu!", 400, 300)
         --escrever a pontuação na tela
-        love.graphics.print("Pontuação: " .. contadorMortes, 400, 400)
+        love.graphics.print("Pontuação: " .. contadorMortes, 100, 400)
 
-        love.graphics.print("Pressione 'R' ", 400, 500)
+        love.graphics.print("Pressione 'R' ", 100, 500)
+        love.graphics.print("(ESC) para SAIR", 100, 600)
         somDemonio:stop()
         somMinotauro:stop()
         if love.keyboard.isDown("r") then
